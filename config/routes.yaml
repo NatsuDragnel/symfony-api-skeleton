@@ -1,0 +1,15 @@
+login:
+    path: /login
+    controller: App\Controller\AuthController::login
+
+login_check:
+    path: /login_check
+
+register:
+    path: /register
+    controller: App\Controller\AuthController::register
+    methods: POST
+
+# api:
+#   path: /v1
+#   controller: App\Controller\AuthController::api

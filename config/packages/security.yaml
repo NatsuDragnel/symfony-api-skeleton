@@ -1,0 +1,77 @@
+security:
+    encoders:
+        # Symfony\Component\Security\Core\User\User: plaintext
+        App\Entity\User:
+            algorithm:        sha512
+            encode_as_base64: false
+            iterations:       1
+
+    role_hierarchy:
+        ROLE_ADMIN:         ROLE_USER
+        ROLE_SUPER_ADMIN:   ROLE_ADMIN
+
+    providers:
+        chain_provider:
+            chain:
+                providers: [in_memory, user_provider]
+        in_memory:
+            memory:
+                users:
+                    superadmin:
+                        password: 'superadminpw'
+                        roles: ['ROLE_SUPER_ADMIN']
+        user_provider:
+            id: App\Security\Provider\UserProvider
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        login:
+            pattern:  ^/login
+            stateless: true
+            anonymous: true
+            provider: user_provider
+            json_login:
+                check_path: /login_check
+                # Attempted with specific username_path and password_path config as well as without
+                username_path: username
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+        register:
+            pattern:  ^/register
+            stateless: true
+            anonymous: true
+        api:
+            pattern:   ^/v1
+            stateless: true
+            anonymous: true
+            provider: user_provider
+            guard:
+                authenticators:
+                    - lexik_jwt_authentication.jwt_token_authenticator
+        main:
+            pattern: ^/
+            form_login:
+                provider: chain_provider
+                csrf_token_generator: security.csrf.token_manager
+                login_path: fos_user_security_login
+                check_path: fos_user_security_check
+                always_use_default_target_path: false
+                default_target_path: admin_admin_index
+
+            logout:
+                path:   fos_user_security_logout
+                target: fos_user_security_login
+            anonymous:    true
+
+
+    access_control:
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/v1, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        
+        # Nelmio Doc
+        - { path: ^/api/doc, roles: IS_AUTHENTICATED_ANONYMOUSLY }
