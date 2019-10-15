@@ -8,12 +8,29 @@ use Symfony\Component\Security\Core\User\AdvancedUserInterface;
 use Doctrine\Common\Collections\Collection;
 use Knp\DoctrineBehaviors\Model\Timestampable\Timestampable;
 use Knp\DoctrineBehaviors\Model\Blameable\Blameable;
+use JMS\Serializer\Annotation as JMS;
+use Hateoas\Configuration\Annotation as Hateoas;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
                                                 
 /**
 * User
 *
-* @ORM\Table(name="papi_user")
+* @ORM\Table(name="papi_user", uniqueConstraints={
+*     @ORM\UniqueConstraint(name="search_idx", columns={"username", "email"})
+* })
 * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+* @UniqueEntity(fields={"email"}, message="user.email.unique", entityClass="App\Entity\User")
+* @UniqueEntity(fields={"username"}, message="user.username.unique", entityClass="App\Entity\User")
+* @JMS\ExclusionPolicy("all")
+* @JMS\XmlRoot("user")
+* @Hateoas\Relation(
+* 		name = "self", 
+* 		href = @Hateoas\Route(
+* 			"get_user", 
+* 			parameters = {"id" = "expr(object.getId())"},
+* 			absolute = true,
+* ))
 * 
 */
   class User implements AdvancedUserInterface, \Serializable
@@ -29,37 +46,58 @@ use Knp\DoctrineBehaviors\Model\Blameable\Blameable;
     * @ORM\Column(name="id", type="integer")
     * @ORM\Id
     * @ORM\GeneratedValue(strategy="AUTO")
+    * @JMS\Expose
+    * @JMS\Groups({"list", "details"})
+    * @JMS\Type("string")
+    * @JMS\XmlAttribute
     */
     private $id;
 
     /**
     * @ORM\Column(name="first_name", type="string", length=25)
+    * @JMS\Expose
+    * @JMS\Groups({"list", "details"})
+    * @JMS\Type("string")
     */
     private $firstName;
 
     /**
     * @ORM\Column(name="last_name", type="string", length=25)
+    * @JMS\Expose
+    * @JMS\Groups({"list", "details"})
+    * @JMS\Type("string")
     */
     private $lastName;
 
     /**
     * @ORM\Column(name="gender", type="string", length=25, nullable=true)
+    * @JMS\Expose
+    * @JMS\Groups({"details"})
+    * @JMS\Type("string")
     */
     private $gender;
 
     /**
     * @ORM\Column(name="phoneNumber", type="string", length=255, nullable=true)
+    * @JMS\Expose
+    * @JMS\Groups({"details"})
+    * @JMS\Type("string")
     */
     private $phoneNumber;
 
     /**
     * @ORM\Column(type="string", length=255, unique=true)
+    * @JMS\Expose
+    * @JMS\Groups({"list", "details"})
+    * @JMS\Type("string")
     */
     private $username;
 
     /**
     * @ORM\Column(type="string", length=255, unique=true)
-    * 
+    * @JMS\Expose
+    * @JMS\Groups({"list", "details"})
+    * @JMS\Type("string")
     */
     private $email;
 
@@ -75,6 +113,7 @@ use Knp\DoctrineBehaviors\Model\Blameable\Blameable;
 
     /**
     * @ORM\Column(type="string", length=255, nullable=true)
+    * @JMS\Groups({"details"})
     */
     private $picture;
 
@@ -87,60 +126,90 @@ use Knp\DoctrineBehaviors\Model\Blameable\Blameable;
     /**
     * @ORM\Column(type="boolean")
     * @var boolean $enabled
+    * @JMS\Expose
+    * @JMS\Groups({"details"})
+    * @JMS\Type("boolean")
     */
     protected $enabled;
 
     /**
     * @ORM\Column(type="boolean")
     * @var boolean $locked
+    * @JMS\Expose
+    * @JMS\Groups({"details"})
+    * @JMS\Type("boolean")
     */
     protected $locked;
 
     /**
     * @ORM\Column(type="boolean")
     * @var boolean $visible
+    * @JMS\Expose
+    * @JMS\Groups({"details"})
+    * @JMS\Type("boolean")
     */
     protected $visible;
     
     /**
-     * @ORM\Column(type="boolean")
-     * @var boolean $super_admin
-     */
+    * @ORM\Column(type="boolean")
+    * @var boolean $super_admin
+    * @JMS\Expose
+    * @JMS\Groups({"details"})
+    * @JMS\Type("boolean")
+    */
     protected $superAdmin;
 
     /**
     * @ORM\Column(name="account_expires_at", type="datetime", nullable=true)
     * @var \DateTime $accountExpiresAt
+    * @JMS\Expose
+    * @JMS\Groups({"details"})
+    * @JMS\Type("DateTime<'Y-m-d H:i'>")
     */
     protected $accountExpiresAt;
 
     /**
     * @ORM\Column(name="credentials_expires_at", type="datetime", nullable=true)
     * @var \DateTime $credentialsExpiresAt
+    * @JMS\Expose
+    * @JMS\Groups({"details"})
+    * @JMS\Type("DateTime<'Y-m-d H:i'>")
     */
     protected $credentialsExpiresAt;
 
     /**
     * @ORM\Column(name="confirmation_token", type="string", nullable=true)
     * @var string $confirmationToken
+    * @JMS\Expose
+    * @JMS\Groups({"details"})
+    * @JMS\Type("string")
     */
     protected $confirmationToken;
 
     /**
     * @ORM\Column(name="password_requested_at", type="datetime", nullable=true)
     * @var \DateTime $passwordRequestedAt
+    * @JMS\Expose
+    * @JMS\Groups({"details"})
+    * @JMS\Type("DateTime<'Y-m-d H:i'>")
     */
     protected $passwordRequestedAt;
 
     /**
     * @ORM\Column(name="password_changed", type="boolean")
     * @var boolean $passwordChanged
+    * @JMS\Expose
+    * @JMS\Groups({"details"})
+    * @JMS\Type("boolean")
     */
     protected $passwordChanged;
 
     /**
     * @var array
     * @ORM\Column(name="roles", type="array")
+    * @JMS\Expose
+    * @JMS\Groups({"details"})
+    * @JMS\Type("array")
     */
     private $roles = array();
 

@@ -1,4 +1,14 @@
 parameters:
+    locale: "en"
+    host_app: http://127.0.0.1
+    host_apis: apis.%host_app%
+    host_oauth: oauth.%host_app%
+    pos.default_scope: user
+    pos.interne_client: true
+    user.mail: user@exemple.com
+    api.version:  v1 # current version
+    api.versions:  v1|v2 # current version
+    knp.doctrine_behaviors.blameable_subscriber.user_entity: App\Entity\User
 
 services:
     # default configuration for services in *this* file
@@ -17,7 +27,7 @@ services:
         resource: '../src/*'
         # you can exclude directories or files
         # but if a service is unused, it's removed anyway
-        exclude: '../src/{Entity,Repository,Event,Listener,Tests,EventListener,Validator,Twig}'
+        exclude: '../src/{Entity,Repository,Event,Listener,Util,Tests,EventListener,Validator,Twig}'
 
     # controllers are imported separately to make sure they're public
     # and have a tag that allows actions to type-hint services
@@ -30,3 +40,25 @@ services:
 
     App\Security\Provider\UserProvider:
         $em: '@doctrine.orm.entity_manager' 
+        
+    # Alias API
+    papis.repository:
+        class: App\Service\Repository
+        autowire: false
+        public: true
+        arguments:
+            $doctrine: '@doctrine'
+            $translator: '@translator'
+            $serializer: '@jms_serializer'
+            $defaultLimit:  50
+            $defaultPage: 1
+            $defaultGroup: 'list'
+            $excludes: ['page', 'limit', 'orderBy', 'fields', 'options']
+            $blameables: ['createdBy', 'updatedBy', 'deletedBy']
+            
+    papis.error_factory:
+        class: App\Service\ErrorFactory
+        autowire: false
+        public: true
+        arguments:
+            $translator: '@translator'

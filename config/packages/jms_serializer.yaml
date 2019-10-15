@@ -1,0 +1,50 @@
+jms_serializer:
+    handlers:
+        datetime:
+            default_format: "Y-m-d\\TH:i:sP" # ATOM
+            default_timezone: "UTC" # defaults to whatever timezone set in php.ini or via date_default_timezone_set
+        array_collection:
+            initialize_excluded: false
+
+    subscribers:
+        doctrine_proxy:
+            initialize_virtual_types: false
+            initialize_excluded: false
+
+    object_constructors:
+        doctrine:
+            fallback_strategy: "null" # possible values ("null" | "exception" | "fallback")
+
+    property_naming:
+        id: 'jms_serializer.identical_property_naming_strategy'
+#        separator:  _
+#        lower_case: true
+#        enable_cache: true
+
+    metadata:
+        cache: file
+        debug: "%kernel.debug%"
+        file_cache:
+            dir: "%kernel.cache_dir%/serializer"
+        auto_detection: true
+        warmup:
+            paths:
+                included: []
+                excluded: []
+                
+    expression_evaluator:
+        id: jms_serializer.expression_evaluator # auto detected
+
+    default_context:
+        serialization:
+            serialize_null: true
+            version: ~
+            attributes: {}
+            groups: ['Default']
+            enable_max_depth_checks: false
+        deserialization:
+            serialize_null: true
+            version: ~
+            attributes: {}
+            groups: ['Default']
+            enable_max_depth_checks: false

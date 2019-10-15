@@ -13,3 +13,8 @@ register:
 # api:
 #   path: /v1
 #   controller: App\Controller\AuthController::api
+
+user:
+    type: rest
+    resource: App\Controller\Api\UserController
+    prefix: /%api.version%
